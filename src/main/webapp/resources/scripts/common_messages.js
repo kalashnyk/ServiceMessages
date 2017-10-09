@@ -1,13 +1,20 @@
-var label_delete = 'Delete';
-var label_edit = 'Edit';
-var label_add = 'Add';
 var label_close = 'Close';
-var label_title_add = 'Add user';
-var label_title_edit = 'Edit user';
-var label_title_cp = 'Change password';
 var label_change = 'Change';
+var label_title_cp = 'Change password';
 var label_title_address_book = 'Address book';
+var label_write = 'Write';
+var title_get_msg_con = "Get message contents";
+var title_add = 'Add contact';
 var label_send = 'Send';
+var title_send = 'Send message';
+var label_delete = 'Delete';
+var title_delete = 'Delete contact';
+var app_name = 'ServiceMessages-1.0.0-BUILD-SNAPSHOT';
+var url_changepassword = "/"+app_name+"/changepassword";
+var url_getmsgcontents = "/"+app_name+"/getmsgcontents";
+var url_addmessage = "/"+app_name+"/addmessage";
+var url_addcontact = "/"+app_name+"/addcontact";
+var url_deletecontact = "/"+app_name+"/deletecontact";
 
 function clearFields() {
 	$("#cur_password").val("");
@@ -18,7 +25,7 @@ function clearFields() {
 function validateFields() {
 	var msg = "";
 
-	$("#msg").text("");
+    $("#msg").text("");
 
 	if (!$("#cur_password").val()) {
 		msg = "The field 'Current password' isn't filled<br>";
@@ -32,9 +39,7 @@ function validateFields() {
 
 	$("#table_cp td:last").html(msg);
 
-	if (msg == '') {
-		return true;
-	}
+	if (msg === '') return true;
 
 	return false;
 }
@@ -90,7 +95,7 @@ function changePassword() {
 
 	$.ajax({
 		type : "POST",
-		url : "/ServiceMessages/changepassword",
+		url : url_changepassword,
 		dataType : 'json',
 		data : JSON.stringify(json),
 		contentType : 'application/json',
@@ -98,8 +103,8 @@ function changePassword() {
 			xhr.setRequestHeader(header, token);
 		},
 		success : function(user) {
-			if (user != 'undefined' && user != null) {
-				if (user.error == 1 || user.id == null) {
+			if (user !== 'undefined' && user !== null) {
+				if (user.error === 1 || user.id === null) {
 					$("#table_headers td:last").html(user.message);
 				} else {
 					closeChangePasswordDialog();
@@ -120,7 +125,7 @@ function showMsgDialog(title, msg) {
 	$(function() {
 		$("#dialog_msg").dialog({
 			title : title,
-			width : 600,
+			width : 700,
 			height : 400,
 			resizable : false,
 			draggable : true,
@@ -128,7 +133,7 @@ function showMsgDialog(title, msg) {
 			autoOpen : true,
 			position : "center",
 			buttons : [ {
-				text : "Close",
+				text : label_close,
 				click : function() {
 					$("#msg").html("");
 					$(this).dialog("close");
@@ -147,8 +152,8 @@ function showViewMsgDialog(label_title_view, msg_id) {
 	$(function() {
 		$("#dialog_view_msg").dialog({
 			title : label_title_view,
-			width : 600,
-			height : 300,
+			width : 700,
+			height : 400,
 			resizable : false,
 			draggable : true,
 			modal : true,
@@ -182,7 +187,7 @@ function getMsg(msg_id) {
 
 	$.ajax({
 		type : "POST",
-		url : "/ServiceMessages/getmsgcontents",
+		url : url_getmsgcontents,
 		dataType : 'json',
 		data : JSON.stringify(json),
 		contentType : 'application/json',
@@ -190,9 +195,9 @@ function getMsg(msg_id) {
 			xhr.setRequestHeader(header, token);
 		},
 		success : function(msg) {
-			if (msg != 'undefined' && msg != null) {
-				if (msg.error == 1 || msg.id == null) {
-					showMsgDialog("Get message contents", msg.message);
+			if (msg !== 'undefined' && msg !== null) {
+				if (msg.error === 1 || msg.id === null) {
+					showMsgDialog(title_get_msg_con, msg.message);
 				} else {
 					$("#view_msg").html(msg.content);
 				}
@@ -208,8 +213,8 @@ function showAddressBookDialog() {
 	$(function() {
 		$("#dialog_address_book").dialog({
 			title : label_title_address_book,
-			width : 600,
-			height : 300,
+			width : 700,
+			height : 400,
 			resizable : false,
 			draggable : true,
 			modal : true,
@@ -235,8 +240,8 @@ function showNewLetterDialog() {
 
 	$(function() {
 		$("#dialog_new_letter").dialog({
-			width : 600,
-			height : 300,
+			width : 700,
+			height : 400,
 			resizable : false,
 			draggable : true,
 			modal : true,
@@ -245,7 +250,6 @@ function showNewLetterDialog() {
 			buttons : [ {
 				text : label_send,
 				click : function() {
-					// closeNewLetterDialog();
 					sendNewLetter();
 				}
 			} ]
@@ -288,7 +292,7 @@ function sendNewLetter() {
 
 	$.ajax({
 		type : "POST",
-		url : "/ServiceMessages/addmessage",
+		url : url_addmessage,
 		dataType : 'json',
 		data : JSON.stringify(json),
 		contentType : 'application/json',
@@ -296,9 +300,9 @@ function sendNewLetter() {
 			xhr.setRequestHeader(header, token);
 		},
 		success : function(msg) {
-			if (msg != 'undefined' && msg != null) {
+			if (msg !== 'undefined' && msg !== null) {
 				if (msg.error == 1) {
-					showMsgDialog("Send message", msg.message);
+					showMsgDialog(title_send, msg.message);
 				} else {
 					closeNewLetterDialog();
 					location.reload();
@@ -319,40 +323,28 @@ function addContact() {
 
 	$.ajax({
 		type : "POST",
-		url : "/ServiceMessages/addcontact",
+		url : url_addcontact,
 		data : "contact=" + add_contact,
 		beforeSend : function(xhr) {
 			xhr.setRequestHeader(header, token);
 		},
 		success : function(adbook) {
-			if (adbook != 'undefined' && adbook != null) {
-				if (adbook.error == 1) {
-					showMsgDialog("Add contact", adbook.message);
+			if (adbook !== 'undefined' && adbook !== null) {
+				if (adbook.error === 1) {
+					showMsgDialog(title_add, adbook.message);
 				} else {
 					$('#listaddressbook').append(
 							"<tr id='rowab_" + adbook.id + "' name='rowab_"
 									+ adbook.id + "'>"
 									+ "<td width='350px'>" + adbook.fio
 									+ "</td><td><nobr>"
-									+ "<input type='button' value='Delete' "
+									+ "<input type='button' value="+label_delete+" "
 									+ "onclick='deleteContact("+adbook.id+");'>&nbsp;"
-									+ "<input type='button' value='Write' "
+									+ "<input type='button' value="+label_write+" "
 									+ "onclick='writeContact("
 									+ adbook.user_id + ", \"" + adbook.fio
 									+ "\", \"" + adbook.login + "\");'>"
 									+ "</nobr></td></tr>");
-//					alert("<tr id='rowab_" + adbook.id + "' name='rowab_"
-//							+ adbook.id + "'>"
-//							+ "<td width='350px'>" + adbook.fio
-//							+ "</td><td><nobr>"
-//							+ "<input type='button' value='Delete' "
-//							+ "onclick='deleteContact("+adbook.id+");'>&nbsp;"
-//							+ "<input type='button' value='Write' "
-//							+ "onclick='writeContact("
-//							+ adbook.user_id + ", \"" + adbook.fio
-//							+ "\", \"" + adbook.login + "\");'>"
-//							+ "</nobr></td></tr>");
-
 				}
 			}
 		},
@@ -368,15 +360,15 @@ function deleteContact(id) {
 
 	$.ajax({
 		type : "POST",
-		url : "/ServiceMessages/deletecontact",
+		url : url_deletecontact,
 		data : "id=" + id,
 		beforeSend : function(xhr) {
 			xhr.setRequestHeader(header, token);
 		},
 		success : function(adbook) {
-			if (adbook != 'undefined' && adbook != null) {
-				if (adbook.error == 1) {
-					showMsgDialog("Delete contact", adbook.message);
+			if (adbook !== 'undefined' && adbook !== null) {
+				if (adbook.error === 1) {
+					showMsgDialog(title_delete, adbook.message);
 				} else {
 					$('#rowab_' + id).remove();
 				}
